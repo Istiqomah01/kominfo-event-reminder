@@ -108,7 +108,7 @@ if __name__=="__main__":
     bot = telebot.TeleBot(TOKEN)
 
     # schedule.every(3).seconds.do(birthday_job, "birthday_list.csv", i[1])
-    schedule.every().day.at("00:30").do(job, "birthday_list.csv", group_id)
+    schedule.every().day.at("00:30").do(birthday_job, "birthday_list.csv", group_id)
 
     while True:
         schedule.run_pending()
