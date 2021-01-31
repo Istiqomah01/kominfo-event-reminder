@@ -102,7 +102,7 @@ def birthday_job(dataframe, chat_id):
     send_birthday_info(data, chat_id)
 
 def is_working():
-    print(f"the application is still running {datetime.now()}, GROUP_ID: {environ['GROUP_ID']}, TOKEN: {environ['TOKEN']}, Timezone: {environ["TZ"]}")
+    print(f"the application is still running, {datetime.now()}, GROUP_ID: {environ['GROUP_ID']}, TOKEN: {environ['TOKEN']}, Timezone: {environ['TZ']}")
 
 if __name__=="__main__":
     TOKEN = environ["TOKEN"]
