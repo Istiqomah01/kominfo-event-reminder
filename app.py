@@ -101,13 +101,16 @@ def birthday_job(dataframe, chat_id):
     data = birthday_dataframe_prep(dataframe)
     send_birthday_info(data, chat_id)
 
+def is_working():
+    print(f"the application is still running {datetime.now()}, GROUP_ID: {environ['GROUP_ID']}, TOKEN: {environ['TOKEN']}, Timezone: {environ["TZ"]}")
+
 if __name__=="__main__":
     TOKEN = environ["TOKEN"]
     group_id = environ["GROUP_ID"]
 
     bot = telebot.TeleBot(TOKEN)
 
-    # schedule.every(3).seconds.do(birthday_job, "birthday_list.csv", i[1])
+    schedule.every(3).seconds.do(is_working)
     schedule.every().day.at("00:30").do(birthday_job, "birthday_list.csv", group_id)
 
     while True:
