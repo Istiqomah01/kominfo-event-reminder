@@ -110,7 +110,7 @@ if __name__=="__main__":
 
     bot = telebot.TeleBot(TOKEN)
 
-    schedule.every(3).seconds.do(is_working)
+    schedule.every(1).minutes.do(is_working)
     schedule.every().day.at("00:30").do(birthday_job, "birthday_list.csv", group_id)
 
     while True:
