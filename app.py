@@ -6,6 +6,9 @@ import schedule
 import os
 from os import environ
 
+
+#Birthday Stuff
+
 def birthday_dataframe_prep(data):
     df = pd.read_csv(data)
     df["Birthday"] = pd.to_datetime(df["Birthday"], dayfirst=True)
@@ -18,7 +21,7 @@ def birthday_dataframe_prep(data):
 
     return df
 
-def birthday_month_name(birthday_month):
+def month_name(month_num):
     month = {1:'Januari',
             2:'Februari',
             3:'Maret',
@@ -32,7 +35,7 @@ def birthday_month_name(birthday_month):
             11:'November',
             12:'Desember'}
 
-    return month[birthday_month]
+    return month[month_num]
 
 def get_today_birthday(data):
     today_day = datetime.today().day
@@ -50,7 +53,7 @@ def get_today_birthday(data):
             no = data[0]
             nama = data[1].loc['Name']
             tanggal = data[1].loc['Birthday_day']
-            bulan = birthday_month_name(data[1].loc['Birthday_month'])
+            bulan = month_name(data[1].loc['Birthday_month'])
             tahun = data[1].loc['Birthday_year']
             umur = datetime.today().year - data[1].loc['Birthday_year']
 
@@ -73,7 +76,7 @@ def get_this_month_birthday(data):
             no = data[0]
             nama = data[1].loc['Name']
             tanggal = data[1].loc['Birthday_day']
-            bulan = birthday_month_name(data[1].loc['Birthday_month'])
+            bulan = month_name(data[1].loc['Birthday_month'])
             tahun = data[1].loc['Birthday_year']
             umur = datetime.today().year - data[1].loc['Birthday_year']
 
@@ -97,12 +100,98 @@ def send_birthday_info(data, chat_id):
     else:
         print(f"tidak ada ulang tahun hari ini, {datetime.now()}")         
 
+
+#Instagram Event
+
+def event_dataframe_prep(data):
+    df = pd.read_csv(data)
+    df["Date"] = pd.to_datetime(df["Date"], dayfirst=True)
+    df["Date_day"] = df["Date"].dt.day
+    df["Date_month"] = df["Date"].dt.month
+    df["Date_year"] = df["Date"].dt.year
+    df.sort_values(by=["Date_month", "Date_day"], inplace=True)
+    df.reset_index(drop=True, inplace=True)
+    df.index += 1
+
+    return df
+
+def get_today_event(data):
+    today_day = datetime.today().day
+    today_month = datetime.today().month
+    mask = (data["Date_day"] == today_day) & (data["Date_month"] == today_month)
+    event = data.loc[mask]
+    event.reset_index(drop=True, inplace=True)
+    event.index += 1
+
+    if event.empty:
+        return None
+    else:
+        output = "Event Hari ini:"
+        for data in event.iterrows():
+            no = data[0]
+            nama = data[1].loc['Event']
+            tanggal = data[1].loc['Date_day']
+            bulan = month_name(data[1].loc['Date_month'])
+            tahun = data[1].loc['Date_year']
+
+            output += f"\n{no}. *{nama}*, {tanggal} {bulan} {tahun}"
+
+        return output
+
+def get_this_month_event(data):
+    today_month = datetime.today().month
+    mask = (data["Date_month"] == today_month)
+    event = data.loc[mask]
+    event.reset_index(drop=True, inplace=True)
+    event.index += 1
+
+    if event.empty:
+        return None
+    else:
+        output = "Event Bulan ini:"
+        for data in event.iterrows():
+            no = data[0]
+            nama = data[1].loc['Event']
+            tanggal = data[1].loc['Date_day']
+            bulan = month_name(data[1].loc['Date_month'])
+            tahun = data[1].loc['Date_year']
+
+            output += f"\n{no}. *{nama}*, {tanggal} {bulan} {tahun}"
+
+        return output
+
+def send_event_info(data, chat_id):
+    if datetime.today().day == 1:
+        month_message = get_this_month_event(data)
+        if month_message is not None:
+            bot.send_message(chat_id, month_message, parse_mode='Markdown')
+            print(f"sending message: {month_message}\n{datetime.now()}\n")
+        else:
+            print(f"tidak ada event bulan ini, {datetime.now()}")
+
+    today_message = get_today_event(data)
+    if today_message is not None:
+        bot.send_message(chat_id, today_message, parse_mode='Markdown')
+        print(f"sending message: {today_message}\n{datetime.now()}\n")
+    else:
+        print(f"tidak ada event hari ini, {datetime.now()}")     
+
+
+#schedule job
+
 def birthday_job(dataframe, chat_id):
     data = birthday_dataframe_prep(dataframe)
     send_birthday_info(data, chat_id)
 
+def event_job(dataframe, chat_id):
+    data = event_dataframe_prep(dataframe)
+    send_event_info(data, chat_id)
+
+#logging every one minute
+
 def is_working():
     print(f"the application is still running, {datetime.now()}, GROUP_ID: {environ['GROUP_ID']}, TOKEN: {environ['TOKEN']}, Timezone: {environ['TZ']}")
+
 
 if __name__=="__main__":
     TOKEN = environ["TOKEN"]
@@ -112,10 +201,13 @@ if __name__=="__main__":
 
     schedule.every(1).minutes.do(is_working)
     schedule.every().day.at("00:30").do(birthday_job, "birthday_list.csv", group_id)
+    schedule.every().day.at("00:30").do(event_job, "event_insta.csv", group_id)
 
     while True:
         schedule.run_pending()
         time.sleep(1)
-    # data = birthday_dataframe_prep("birthday_list.csv")
-    # print(get_this_month_birthday(data))
+
+    # data = event_dataframe_prep("event_insta.csv")
+    # print(get_this_month_event(data))
+    # print(get_today_event(data))
 
