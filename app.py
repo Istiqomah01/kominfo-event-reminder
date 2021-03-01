@@ -1,13 +1,18 @@
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import telebot
 import schedule
 import os
 from os import environ
+import pytz
+
 from dotenv import load_dotenv
 load_dotenv()
 
+#setup timezone
+WIB = pytz.timezone('Asia/Jakarta')
+today_datetime = datetime.now(tz = WIB)
 
 
 #Birthday Stuff
@@ -41,8 +46,8 @@ def month_name(month_num):
     return month[month_num]
 
 def get_today_birthday(data):
-    today_day = datetime.today().day
-    today_month = datetime.today().month
+    today_day = today_datetime.day
+    today_month = today_datetime.month
     mask = (data["Birthday_day"] == today_day) & (data["Birthday_month"] == today_month)
     birthday = data.loc[mask]
     birthday.reset_index(drop=True, inplace=True)
@@ -65,9 +70,12 @@ def get_today_birthday(data):
         return output
 
 def get_tomorrow_birthday(data):
-    today_day = datetime.today().day
-    today_month = datetime.today().month
-    mask = (data["Birthday_day"] == today_day + 1) & (data["Birthday_month"] == today_month)
+    one_day = timedelta(days=1)
+    tomorrow = today_datetime + one_day
+
+    tomorrow_day = tomorrow.day
+    tomorrow_month = tomorrow.month
+    mask = (data["Birthday_day"] == tomorrow_day) & (data["Birthday_month"] == tomorrow_month)
     birthday = data.loc[mask]
     birthday.reset_index(drop=True, inplace=True)
     birthday.index += 1
@@ -89,7 +97,7 @@ def get_tomorrow_birthday(data):
         return output
 
 def get_this_month_birthday(data):
-    this_month = datetime.today().month
+    this_month = today_datetime.month
     mask = (data["Birthday_month"] == this_month)
     birthday = data.loc[mask]
     birthday.reset_index(drop=True, inplace=True)
@@ -113,7 +121,7 @@ def get_this_month_birthday(data):
 
 def send_birthday_info(data, chat_id, bot):
     # Send message for the month
-    if datetime.today().day == 1:
+    if today_datetime.day == 1:
         month_message = get_this_month_birthday(data)
         if month_message is not None:
             bot.send_message(chat_id, month_message, parse_mode='Markdown')
@@ -153,8 +161,8 @@ def event_dataframe_prep(data):
     return df
 
 def get_today_event(data):
-    today_day = datetime.today().day
-    today_month = datetime.today().month
+    today_day = today_datetime.day
+    today_month = today_datetime.month
     mask = (data["Date_day"] == today_day) & (data["Date_month"] == today_month)
     event = data.loc[mask]
     event.reset_index(drop=True, inplace=True)
@@ -176,9 +184,12 @@ def get_today_event(data):
         return output
 
 def get_tomorrow_event(data):
-    today_day = datetime.today().day
-    today_month = datetime.today().month
-    mask = (data["Date_day"] == today_day + 1) & (data["Date_month"] == today_month)
+    one_day = timedelta(days=1)
+    tomorrow = today_datetime + one_day
+
+    tomorrow_day = tomorrow.day
+    tomorrow_month = tomorrow.month
+    mask = (data["Date_day"] == tomorrow_day) & (data["Date_month"] == tomorrow_month)
     event = data.loc[mask]
     event.reset_index(drop=True, inplace=True)
     event.index += 1
@@ -199,7 +210,7 @@ def get_tomorrow_event(data):
         return output
 
 def get_this_month_event(data):
-    today_month = datetime.today().month
+    today_month = today_datetime.month
     mask = (data["Date_month"] == today_month)
     event = data.loc[mask]
     event.reset_index(drop=True, inplace=True)
@@ -222,7 +233,7 @@ def get_this_month_event(data):
 
 def send_event_info(data, chat_id, bot):
     # Send message for the month
-    if datetime.today().day == 1:
+    if today_datetime.day == 1:
         month_message = get_this_month_event(data)
         if month_message is not None:
             bot.send_message(chat_id, month_message, parse_mode='Markdown')

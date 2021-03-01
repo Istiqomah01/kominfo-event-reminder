@@ -14,3 +14,6 @@ test_group_id = os.getenv("TEST_GROUP_ID")
 bot = telebot.TeleBot(TOKEN)
 
 bot.send_message(test_group_id, "bruhhhh", parse_mode='Markdown')
+if __name__ == '__main__':
+    app.birthday_job("birthday_list.csv", test_group_id, bot)
+    app.event_job("event_insta.csv", test_group_id, bot)
