@@ -1,6 +1,6 @@
-## kominfo-event-reminder
+# kominfo-event-reminder
 
-# Install the requirenments package
+## Install the requirenments package
 
 - certifi==2020.12.5
 - chardet==4.0.0
